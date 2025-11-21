@@ -1,0 +1,71 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            Int       @id @default(autoincrement())
+  name          String
+  email         String    @unique
+  password_hash String
+  phone_number  String
+  role          String    @default("USER") // 'USER' or 'ADMIN'
+  created_at    DateTime  @default(now())
+  vehicles      Vehicle[]
+}
+
+model Category {
+  id       Int       @id @default(autoincrement())
+  name     String
+  slug     String    @unique
+  vehicles Vehicle[]
+}
+
+model Vehicle {
+  id          Int      @id @default(autoincrement())
+  user_id     Int
+  category_id Int?
+
+  title       String
+  brand       String
+  model       String
+  year        Int
+
+  transmission String // 'Manual', 'Automatic'
+  fuel_type    String?
+  engine_size  Int?
+  mileage      Int
+  color        String?
+
+  price             Decimal  @db.Decimal(15, 2)
+  description       String?  @db.Text
+  location_province String
+  location_city     String
+
+  is_sold     Boolean  @default(false)
+  status      String   @default("PENDING") // 'PENDING', 'ACTIVE', 'REJECTED'
+
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  // Relations
+  user        User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  category    Category? @relation(fields: [category_id], references: [id])
+  images      VehicleImage[]
+}
+
+model VehicleImage {
+  id         Int     @id @default(autoincrement())
+  vehicle_id Int
+  image_url  String
+  is_primary Boolean @default(false)
+
+  vehicle    Vehicle @relation(fields: [vehicle_id], references: [id], onDelete: Cascade)
+}
