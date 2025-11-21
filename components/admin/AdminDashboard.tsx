@@ -19,8 +19,8 @@ const AdminDashboard: React.FC = () => {
 
   const fetchVehicles = async () => {
     try {
-      // In real app, this would be a specialized admin endpoint with auth
-      const res = await fetch('/api/vehicles?limit=50');
+      // Pass admin=true to fetch all listings regardless of status
+      const res = await fetch('/api/vehicles?limit=50&admin=true');
       const data = await res.json();
       setVehicles(data.data || []);
     } catch (error) {

@@ -12,10 +12,14 @@ export async function GET(request: NextRequest) {
   const yearMin = searchParams.get('year_min');
   const yearMax = searchParams.get('year_max');
   const transmission = searchParams.get('transmission');
+  const isAdmin = searchParams.get('admin') === 'true'; // Check if admin mode
 
-  const where: Prisma.VehicleWhereInput = {
-    status: 'ACTIVE', // Only show active listings by default
-  };
+  const where: Prisma.VehicleWhereInput = {};
+
+  // If not admin request, only show ACTIVE listings
+  if (!isAdmin) {
+    where.status = 'ACTIVE';
+  }
 
   if (brand) {
     where.brand = { contains: brand, mode: 'insensitive' };
@@ -43,7 +47,8 @@ export async function GET(request: NextRequest) {
           images: {
             where: { is_primary: true },
             take: 1
-          }
+          },
+          user: isAdmin ? { select: { name: true } } : false // Include user info for admin
         }
       }),
       prisma.vehicle.count({ where })
